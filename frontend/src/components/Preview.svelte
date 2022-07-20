@@ -12,11 +12,10 @@
         let partyid = localStorage.getItem("partyid")
         getSession()
         let sessionid = localStorage.getItem("session")
-        getMeta().then(meta => {
-            let backend = meta.backend
-            fetch(`${backend}/propose?partyid=${partyid}&sessionid=${sessionid}&songid=${songid}`)
-                .then(refreshPartyState)
-        })
+        let backend: String = document
+            .querySelector("meta[name=backend-address]").content;
+        fetch(`${backend}/propose?partyid=${partyid}&sessionid=${sessionid}&songid=${songid}`)
+            .then(refreshPartyState)
     }
 </script>
 

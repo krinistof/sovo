@@ -5,14 +5,12 @@
         let partyid = localStorage.getItem("partyid")
         getSession()
         let sessionid = localStorage.getItem("session")
-        getMeta()
-            .then(meta => {
-                let backend = meta.backend
-                fetch(`${backend}/queue?partyid=${partyid}&sessionid=${sessionid}`)
-                    .then(resp => resp.json())
-                    .then(result => {
-                        partyState.set(result)
-                    })
+        let backend: String = document
+            .querySelector("meta[name=backend-address]").content;
+        fetch(`${backend}/queue?partyid=${partyid}&sessionid=${sessionid}`)
+            .then(resp => resp.json())
+            .then(result => {
+                partyState.set(result)
             })
     }
 </script>

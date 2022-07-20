@@ -26,10 +26,9 @@
            setTimeout(refreshPartyState, 15000)
            return
        }
-       getMeta()
-           .then(meta => {
-               let backend = meta.backend
-               let password = localStorage.getItem("password")
+       let backend: String = document
+           .querySelector("meta[name=backend-address]").content;
+       let password = localStorage.getItem("password")
                fetch(`${backend}/next?partyid=${partyid}&password=${password}`)
                    .then(resp => resp.json())
                    .then(data => {
@@ -42,8 +41,6 @@
                            playCurrent()
                        }, 500)
                    })
-           })
-
    }
 
    function playCurrent(){
@@ -61,13 +58,11 @@
    }
 
    function toggleParty() {
-       getMeta()
-           .then(meta => {
-               let backend = meta.backend
-               let password = localStorage.getItem("password")
-               fetch(`${backend}/toggle?partyid=${partyid}&password=${password}`)
-                   .then(() => setTimeout(refreshPartyState, 500))
-           })
+       let backend: String = document
+           .querySelector("meta[name=backend-address]").content;
+       let password = localStorage.getItem("password")
+       fetch(`${backend}/toggle?partyid=${partyid}&password=${password}`)
+           .then(() => setTimeout(refreshPartyState, 500))
    }
 
    refreshPartyState()

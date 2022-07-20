@@ -6,15 +6,11 @@
     let partyid
     let password
     function createParty() {
-        getMeta()
-            .then(meta => {
-                let backend = meta.backend
-                saltHash(password)
-                password = localStorage.getItem("password")
-                fetch(`${backend}/create-party?partyid=${partyid}&password=${password}`)
-                    .then(() => {router.goto(`/host/${partyid}`)})
-
-            })
+        saltHash(password)
+        password = localStorage.getItem("password")
+        let backend: String = document
+            .querySelector("meta[name=backend-address]").content;
+        fetch(`${backend}/create-party?partyid=${partyid}&password=${password}`)
     }
 </script>
 

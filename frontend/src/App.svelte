@@ -13,12 +13,11 @@
     export function getSession(){
         let trySession = localStorage.getItem("session")
         if(trySession === null) {
-            getMeta().then(meta => {
-                let backend = meta.backend
-                return fetch(`${backend}/auth/get-session`)
-                    .then(resp => resp.json())
-                    .then(result => localStorage.setItem("session", result))
-            })
+            let backend: String = document
+                .querySelector("meta[name=backend-address]").content;
+            return fetch(`${backend}/auth/get-session`)
+                .then(resp => resp.json())
+                .then(result => localStorage.setItem("session", result))
         } else
             return Promise.resolve(trySession)
     }
