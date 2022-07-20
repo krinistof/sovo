@@ -47,7 +47,10 @@
        if(!player.paused)
            return
        let songid = $partyState.currentSong["$oid"]
-       player = new Audio(`songs/${songid}`)
+
+       let cdn: String = document
+           .querySelector("meta[name=cdn-address]").content;
+       player = new Audio(`${cdn}/songs/${songid}`)
        player.play()
        getMeta()
            .then(meta => {

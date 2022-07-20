@@ -4,7 +4,9 @@
     export function getMeta() {
         console.log(metadata)
         if(metadata === null){
-            return fetch("songs/meta.json")
+            let cdn: String = document
+               .querySelector("meta[name=cdn-address]").content;
+            return fetch(`${cdn}/songs/meta.json`)
                 .then(resp => resp.json())
                 .then(data => metadata = data)
         }
