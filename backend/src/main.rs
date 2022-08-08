@@ -1,53 +1,59 @@
-mod api;
-
-use api::{
-    show_queue,
-    get_session,
-    vote,
-    propose,
-    create_party,
-    next,
-    toggle
-};
 use actix_web::{
-    web,
-    App,
-    HttpServer,
+    guard, middleware::Logger, web, web::Data, App, HttpRequest, HttpResponse, HttpServer, Result,
 };
-use actix_cors::Cors;
-use actix_web::middleware::Logger;
-use mongodb::Client;
+use async_graphql::{
+    http::{playground_source, GraphQLPlaygroundConfig},
+    Schema,
+};
+use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
+use config::Mongo;
+use handler::{Mutation, Query, SovoSchema, Subscription};
+
+mod config;
+mod handler;
+mod schema;
+
+async fn index(schema: web::Data<SovoSchema>, req: GraphQLRequest) -> GraphQLResponse {
+    schema.execute(req.into_inner()).await.into()
+}
+
+async fn index_playground() -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(playground_source(
+            GraphQLPlaygroundConfig::new("/").subscription_endpoint("/"),
+        )))
+}
+
+async fn index_ws(
+    schema: web::Data<SovoSchema>,
+    req: HttpRequest,
+    payload: web::Payload,
+) -> Result<HttpResponse> {
+    GraphQLSubscription::new(Schema::clone(&*schema)).start(&req, payload)
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "debug");
-    std::env::set_var("RUST_BACKTRACE", "1");
-    env_logger::init();
-
-    let uri = std::env::var("MONGODB_URI")
-        .unwrap();
-    let client = Client::with_uri_str(uri)
-        .await
-        .unwrap();
+    let db = Mongo::init().await;
+    let schema = Schema::build(Query, Mutation, Subscription)
+        .data(db)
+        .finish();
 
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allow_any_method()
-            .allow_any_origin();
-        let logger = Logger::default();
         App::new()
-            .app_data(web::Data::new(client.clone()))
-            .wrap(cors)
-            .wrap(logger)
-            .service(show_queue)
-            .service(get_session)
-            .service(vote)
-            .service(propose)
-            .service(create_party)
-            .service(next)
-            .service(toggle)
+            .wrap(Logger::default())
+            .app_data(Data::new(schema.clone()))
+            .service(web::resource("/").guard(guard::Post()).to(index))
+            .service(
+                web::resource("/")
+                    .guard(guard::Get())
+                    .guard(guard::Header("upgrade", "websocket"))
+                    .to(index_ws),
+            )
+            .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
-    .bind(("0.0.0.0", 1337))?
+    .bind("127.0.0.1:8000")?
     .run()
     .await
 }
