@@ -1,4 +1,6 @@
 backend/target
+backend/Cargo.lock
+backend/.env
 frontend/node_modules
 frontend/package-lock.json
 .idea

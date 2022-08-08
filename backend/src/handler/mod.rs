@@ -10,7 +10,7 @@ pub struct Query;
 
 #[Object()]
 impl Query {
-    async fn test(&self, ctd: &Context<'_>) -> String {
+    async fn test(&self, ctx: &Context<'_>) -> String {
         "It works!!".to_owned()
     }
 }

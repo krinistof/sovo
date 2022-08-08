@@ -1,5 +1,5 @@
 use actix_web::{
-    guard, middleware::Logger, web, web::Data, App, HttpRequest, HttpResponse, HttpServer, Result,
+    guard, middleware::Logger, web, web::Data, App, HttpRequest, HttpResponse, HttpServer, Result
 };
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
@@ -35,6 +35,10 @@ async fn index_ws(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "info");
+    std::env::set_var("RUST_BACKTRACE", "1");
+    env_logger::init();
+
     let db = Mongo::init().await;
     let schema = Schema::build(Query, Mutation, Subscription)
         .data(db)
@@ -53,6 +57,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
+    .workers(2)
     .bind("127.0.0.1:8000")?
     .run()
     .await
