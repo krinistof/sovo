@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'sovo-graphql-backend'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=sovo-graphql-backend",
+                    "--package=sovo-graphql-backend"
+                ],
+                "filter": {
+                    "name": "sovo-graphql-backend",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'sovo-graphql-backend'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=sovo-graphql-backend",
+                    "--package=sovo-graphql-backend"
+                ],
+                "filter": {
+                    "name": "sovo-graphql-backend",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
