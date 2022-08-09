@@ -1,5 +1,9 @@
 use async_graphql::{Context, Object, Schema, Subscription};
+use mongodb::bson::oid::ObjectId;
 use futures_util::Stream;
+use anyhow::Result;
+use crate::config::Mongo;
+
 
 //TODO dev thing, remove
 use std::time::Duration;
@@ -10,7 +14,7 @@ pub struct Query;
 
 #[Object()]
 impl Query {
-    async fn test(&self, ctx: &Context<'_>) -> String {
+    async fn test(&self, _ctx: &Context<'_>) -> String {
         "It works!!".to_owned()
     }
 }
@@ -19,7 +23,12 @@ pub struct Mutation;
 
 #[Object]
 impl Mutation {
-    async fn test(&self, ctx: &Context<'_>) -> String {
+    async fn create_session(&self, ctx: &Context<'_>) -> Result<ObjectId> {
+        let db = ctx.data_unchecked::<Mongo>();
+        db.create_session().await
+    }
+
+    async fn test(&self, _ctx: &Context<'_>) -> String {
         "xdlol".to_owned()
     }
 }
