@@ -55,3 +55,9 @@ pub struct FetchSession {
     _id: String,
     joined: String,
 }
+
+#[derive(serde::Deserialize)]
+pub struct Session {
+    pub _id: ObjectId,
+    pub address: String  
+}

@@ -1,6 +1,5 @@
 use dotenv::dotenv;
 use crate::schema::*;
-//use futures::TryStreamExt;
 use std::env;
 use anyhow::{Result, Context};
 use mongodb::{
@@ -28,7 +27,21 @@ impl Mongo {
         data_source.db.collection(collection_name)
     }
 
+    async fn check_session_by_addr(&self, addr: String) -> Option<Session> {
+        Self::collection::<Session>(self, "sessions")
+            .find_one(doc! {
+                "address": addr
+            }, None)
+            .await
+            .unwrap_or(None)
+    }
+
     pub async fn create_session(&self, addr: String) -> Result<ObjectId> {
+        if cfg!(feature="strict-ip-filter") {
+            if let Some(doc) = Self::check_session_by_addr(self, addr.clone()).await {
+                return Ok(doc._id);
+            }
+        }
         Self::collection(self, "sessions")
             .insert_one(doc! {
                 "joined": DateTime::now(),

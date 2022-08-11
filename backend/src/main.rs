@@ -1,9 +1,8 @@
 use config::Mongo;
 use async_graphql::Schema;
-use crate::handler::endpoints::services;
 use handler::{Mutation, Query, Subscription, endpoints::{index, index_playground, index_ws}};
 use actix_web::{
-    guard, middleware::Logger, web, web::Data, App, HttpRequest, HttpResponse, HttpServer, Result
+    guard, middleware::Logger, web, web::Data, App, HttpServer
 };
 
 mod config;
