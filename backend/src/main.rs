@@ -1,9 +1,9 @@
 use config::Mongo;
 use async_graphql::Schema;
 use crate::handler::endpoints::services;
-use handler::{Mutation, Query, Subscription};
+use handler::{Mutation, Query, Subscription, endpoints::{index, index_playground, index_ws}};
 use actix_web::{
-    middleware::Logger, web::Data, App, HttpServer
+    guard, middleware::Logger, web, web::Data, App, HttpRequest, HttpResponse, HttpServer, Result
 };
 
 mod config;
@@ -23,9 +23,16 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .configure(services)
             .wrap(Logger::default())
             .app_data(Data::new(schema.clone()))
+            .service(web::resource("/").guard(guard::Post()).to(index))
+            .service(
+                web::resource("/")
+                    .guard(guard::Get())
+                    .guard(guard::Header("upgrade", "websocket"))
+                    .to(index_ws),
+            )
+            .service(web::resource("/").guard(guard::Get()).to(index_playground))
     })
     .workers(2)
     .bind("0.0.0.0:8000")?

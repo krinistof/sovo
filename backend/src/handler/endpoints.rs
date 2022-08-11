@@ -22,7 +22,7 @@ pub fn services(cfg: &mut web::ServiceConfig) {
         );
 }
 
-async fn index_playground() -> Result<HttpResponse> {
+pub async fn index_playground() -> Result<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(playground_source(
@@ -42,7 +42,7 @@ pub async fn index(
     schema.execute(request).await.into()
 }
 
-async fn index_ws(
+pub async fn index_ws(
     schema: web::Data<SovoSchema>,
     req: HttpRequest,
     payload: web::Payload,
