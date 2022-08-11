@@ -4,6 +4,7 @@ use futures_util::Stream;
 use anyhow::Result;
 use crate::config::Mongo;
 
+pub mod endpoints;
 
 //TODO dev thing, remove
 use std::time::Duration;
@@ -25,7 +26,8 @@ pub struct Mutation;
 impl Mutation {
     async fn create_session(&self, ctx: &Context<'_>) -> Result<ObjectId> {
         let db = ctx.data_unchecked::<Mongo>();
-        db.create_session().await
+        let addr = ctx.data_unchecked::<String>();
+        db.create_session(addr.to_string()).await
     }
 
     async fn test(&self, _ctx: &Context<'_>) -> String {

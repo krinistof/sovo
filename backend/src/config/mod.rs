@@ -28,10 +28,11 @@ impl Mongo {
         data_source.db.collection(collection_name)
     }
 
-    pub async fn create_session(&self) -> Result<ObjectId> {
+    pub async fn create_session(&self, addr: String) -> Result<ObjectId> {
         Self::collection(self, "sessions")
             .insert_one(doc! {
-                "joined": DateTime::now()
+                "joined": DateTime::now(),
+                "address": addr
             }, None)
             .await?
             .inserted_id
