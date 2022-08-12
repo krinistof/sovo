@@ -30,6 +30,15 @@ impl Mutation {
         db.create_session(addr.to_string()).await
     }
 
+    async fn create_party(
+        &self, ctx: &Context<'_>,
+        partyid: String,
+       password: String
+    ) -> Result<i32> {
+        let db = ctx.data_unchecked::<Mongo>();
+        db.create_party(partyid, password).await
+    }
+
     async fn test(&self, _ctx: &Context<'_>) -> String {
         "xdlol".to_owned()
     }

@@ -3,7 +3,7 @@ use crate::schema::*;
 use std::env;
 use anyhow::{Result, Context};
 use mongodb::{
-    bson::{doc, oid::ObjectId, DateTime},
+    bson::{doc, oid::ObjectId, DateTime, Bson::Null},
     Client, Collection, Database,
 };
 
@@ -53,4 +53,23 @@ impl Mongo {
             .context("query error")
     }
     
+    
+    pub async fn create_party(&self,
+        partyid: String,
+       password: String
+    ) -> Result<i32> {
+        Self::collection(self, "parties")
+            .insert_one(
+                doc! {
+                    "_id": partyid,
+                    "isLive": false,
+                    "currentSong": Null,
+                    "password": password,
+                    "queue": [],
+                },
+                None
+            )
+            .await?;
+        Ok(0)
+    }
 }
