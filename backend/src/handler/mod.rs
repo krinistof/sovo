@@ -50,11 +50,23 @@ impl Mutation {
         ctx: &Context<'_>,
         session: ObjectId,
         partyid: String,
-        song_oid: ObjectId,
+        songid: ObjectId,
         opinion: Opinion,
     ) -> Result<bool> {
         let db = ctx.data_unchecked::<Mongo>();
-        db.process_vote(session, partyid, song_oid, opinion).await?;
+        db.process_vote(session, partyid, songid, opinion).await?;
+        Ok(true)
+    }
+
+    async fn propose(
+        &self,
+        ctx: &Context<'_>,
+        session: ObjectId,
+        partyid: String,
+        songid: ObjectId,
+    ) -> Result<bool> {
+        let db = ctx.data_unchecked::<Mongo>();
+        db.add_propose(session, partyid, songid).await?;
         Ok(true)
     }
 }

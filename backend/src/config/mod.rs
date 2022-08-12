@@ -152,7 +152,7 @@ impl Mongo {
             .await?;
         Ok(())
     }
-    
+
     async fn sort_by_rank(&self, partyid: &String) -> Result<()> {
         Self::calculate_rank(self, partyid).await?;
 
@@ -166,6 +166,32 @@ impl Mongo {
                             "$sort": {"rank": -1}
                         }
                     }
+                },
+                None,
+            )
+            .await?;
+        Ok(())
+    }
+
+    pub async fn add_propose(
+        &self,
+        session: ObjectId,
+        partyid: String,
+        songid: ObjectId,
+    ) -> Result<()> {
+        Self::collection::<Party>(self, "parties")
+            .update_one(
+                doc! {
+                    "_id": partyid
+                },
+                doc! {
+                    // TODO push may be more effective
+                    "$addToSet": {"queue": {"votes": [{
+                        "voter": session,
+                        "opinion": 1
+                    }],
+                    "rank": 1,
+                    "songid": songid}}
                 },
                 None,
             )
