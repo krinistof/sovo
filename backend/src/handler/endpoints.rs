@@ -1,14 +1,10 @@
-use actix_web::{
-    web, HttpRequest, HttpResponse, Result
-};
+use crate::handler::SovoSchema;
+use actix_web::{web, HttpRequest, HttpResponse, Result};
 use async_graphql::{
     http::{playground_source, GraphQLPlaygroundConfig},
-    Schema, Data
+    Data, Schema,
 };
-use async_graphql_actix_web::{
-    GraphQLRequest, GraphQLResponse, GraphQLSubscription
-};
-use crate::handler::SovoSchema;
+use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 
 pub async fn index_playground() -> Result<HttpResponse> {
     Ok(HttpResponse::Ok()
@@ -21,7 +17,7 @@ pub async fn index_playground() -> Result<HttpResponse> {
 pub async fn index(
     schema: web::Data<SovoSchema>,
     req: HttpRequest,
-    gql_req: GraphQLRequest
+    gql_req: GraphQLRequest,
 ) -> GraphQLResponse {
     let mut request = gql_req.into_inner();
     if let Some(addr) = req.peer_addr() {

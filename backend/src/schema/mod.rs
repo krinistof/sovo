@@ -1,4 +1,4 @@
-use async_graphql::{InputObject, SimpleObject};
+use async_graphql::*;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
@@ -59,5 +59,39 @@ pub struct FetchSession {
 #[derive(serde::Deserialize)]
 pub struct Session {
     pub _id: ObjectId,
-    pub address: String  
+    pub address: String,
+}
+
+#[derive(serde::Deserialize, Clone, Copy, Debug)]
+pub enum Opinion {
+    Like = 1,
+    Neutral = 0,
+    Dislike = -1,
+}
+
+#[Scalar]
+impl ScalarType for Opinion {
+    fn parse(value: Value) -> InputValueResult<Self> {
+        if let Value::Number(n) = &value {
+            if let Some(n) = n.as_i64() {
+                return match n {
+                    1 => Ok(Opinion::Like),
+                    0 => Ok(Opinion::Neutral),
+                    -1 => Ok(Opinion::Dislike),
+                    _ => Err(InputValueError::expected_type(value)),
+                };
+            }
+        }
+        Err(InputValueError::expected_type(value))
+    }
+
+    fn to_value(&self) -> Value {
+        Value::Number((*self as i32).into())
+    }
+}
+
+impl Opinion {
+    pub fn int(&self) -> i64 {
+        *self as i64
+    }
 }

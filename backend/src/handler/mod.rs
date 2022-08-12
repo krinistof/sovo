@@ -1,8 +1,8 @@
-use async_graphql::{Context, Object, Schema, Subscription};
-use mongodb::bson::oid::ObjectId;
-use futures_util::Stream;
+use crate::{config::Mongo, schema::Opinion};
 use anyhow::Result;
-use crate::config::Mongo;
+use async_graphql::{Context, Object, Schema, Subscription};
+use futures_util::Stream;
+use mongodb::bson::oid::ObjectId;
 
 pub mod endpoints;
 
@@ -31,16 +31,31 @@ impl Mutation {
     }
 
     async fn create_party(
-        &self, ctx: &Context<'_>,
+        &self,
+        ctx: &Context<'_>,
         partyid: String,
-       password: String
-    ) -> Result<i32> {
+        password: String,
+    ) -> Result<bool> {
         let db = ctx.data_unchecked::<Mongo>();
-        db.create_party(partyid, password).await
+        db.create_party(partyid, password).await?;
+        Ok(true)
     }
 
     async fn test(&self, _ctx: &Context<'_>) -> String {
         "xdlol".to_owned()
+    }
+
+    async fn vote(
+        &self,
+        ctx: &Context<'_>,
+        session: ObjectId,
+        partyid: String,
+        song_oid: ObjectId,
+        opinion: Opinion,
+    ) -> Result<bool> {
+        let db = ctx.data_unchecked::<Mongo>();
+        db.process_vote(session, partyid, song_oid, opinion).await?;
+        Ok(true)
     }
 }
 
