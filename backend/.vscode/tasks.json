@@ -3,12 +3,21 @@
 	"tasks": [
 		{
 			"type": "cargo",
-			"subcommand": "build",
+			"command": "build",
 			"problemMatcher": [
 				"$rustc"
 			],
 			"group": "build",
-			"label": "Rust: cargo build - backend"
+			"label": "rust: cargo build"
+		},
+		{
+			"type": "cargo",
+			"command": "run",
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"label": "rust: cargo run"
 		}
 	]
 }
