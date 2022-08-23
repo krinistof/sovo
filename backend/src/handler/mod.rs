@@ -41,10 +41,6 @@ impl Mutation {
         Ok(true)
     }
 
-    async fn test(&self, _ctx: &Context<'_>) -> String {
-        "xdlol".to_owned()
-    }
-
     async fn vote(
         &self,
         ctx: &Context<'_>,
@@ -68,6 +64,27 @@ impl Mutation {
         let db = ctx.data_unchecked::<Mongo>();
         db.add_propose(session, partyid, songid).await?;
         Ok(true)
+    }
+
+    async fn toggle_live(
+        &self,
+        ctx: &Context<'_>,
+        partyid: String,
+        password: String,
+    ) -> Result<bool> {
+        let db = ctx.data_unchecked::<Mongo>();
+        db.toggle_live(partyid, password).await?;
+        Ok(true)
+    }
+
+    pub async fn next_song(
+        &self,
+        ctx: &Context<'_>,
+        partyid: String,
+        password: String,
+    ) -> Result<ObjectId> {
+        let db = ctx.data_unchecked::<Mongo>();
+        db.pop_popular_song(partyid, password).await
     }
 }
 

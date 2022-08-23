@@ -1,4 +1,6 @@
-use async_graphql::*;
+use async_graphql::{
+    InputObject, InputValueError, InputValueResult, Scalar, ScalarType, SimpleObject, Value,
+};
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
@@ -91,7 +93,7 @@ impl ScalarType for Opinion {
 }
 
 impl Opinion {
-    pub fn int(&self) -> i64 {
-        *self as i64
+    pub fn int(self) -> i64 {
+        self as i64
     }
 }

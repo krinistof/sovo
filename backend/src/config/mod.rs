@@ -1,8 +1,10 @@
-use crate::schema::*;
+use crate::schema::{Opinion, Party, Session};
+use anyhow::anyhow;
 use anyhow::{Context, Result};
 use dotenv::dotenv;
+use futures_util::TryStreamExt;
 use mongodb::{
-    bson::{doc, oid::ObjectId, Bson::Null, DateTime},
+    bson::{doc, oid::ObjectId, Bson::Null, DateTime, Document},
     options::UpdateOptions,
     Client, Collection, Database,
 };
@@ -129,7 +131,7 @@ impl Mongo {
         Ok(())
     }
 
-    async fn calculate_rank(&self, partyid: &String) -> Result<()> {
+    async fn calculate_rank(&self, partyid: &str) -> Result<()> {
         Self::collection::<Party>(self, "parties")
             .update_one(
                 doc! {
@@ -153,7 +155,7 @@ impl Mongo {
         Ok(())
     }
 
-    async fn sort_by_rank(&self, partyid: &String) -> Result<()> {
+    async fn sort_by_rank(&self, partyid: &str) -> Result<()> {
         Self::calculate_rank(self, partyid).await?;
 
         Self::collection::<Party>(self, "parties")
@@ -179,20 +181,97 @@ impl Mongo {
         partyid: String,
         songid: ObjectId,
     ) -> Result<()> {
+        //TODO check if song is already proposed
         Self::collection::<Party>(self, "parties")
             .update_one(
                 doc! {
                     "_id": partyid
                 },
                 doc! {
-                    // TODO push may be more effective
-                    "$addToSet": {"queue": {"votes": [{
+                    "$push": {"queue": {"votes": [{
                         "voter": session,
                         "opinion": 1
                     }],
                     "rank": 1,
                     "songid": songid}}
                 },
+                None,
+            )
+            .await?;
+        Ok(())
+    }
+
+    pub async fn pop_popular_song(&self, partyid: String, password: String) -> Result<ObjectId> {
+        let parties = Self::collection::<Document>(self, "parties");
+
+        // set currentSong to the first element of the ordered queue
+        parties
+            .update_one(
+                doc! {
+                    "_id": &partyid,
+                    "password": &password
+                },
+                vec![doc! {"$set": {
+                    "currentSong": {
+                    "$first": "$queue.songid"
+                }
+                }}],
+                None,
+            )
+            .await?;
+
+        // remove the first element of queue
+        parties
+            .update_one(
+                doc! {
+                    "_id": &partyid,
+                    "password": password
+                },
+                doc! {"$pop": {
+                "queue": -1i32
+                }},
+                None,
+            )
+            .await?;
+
+        let err = || anyhow!("no current song present");
+        //return the currentSong
+        let song = parties
+            .aggregate(
+                vec![
+                    doc! {"$match": {
+                    "_id": partyid,
+                    }},
+                    doc! {"$project": {"currentSong": 1i32}},
+                ],
+                None,
+            )
+            .await?
+            .try_collect::<Vec<Document>>()
+            .await?
+            .get(0)
+            .ok_or_else(&err)?
+            .get("currentSong")
+            .ok_or_else(&err)?
+            .as_object_id()
+            .ok_or_else(&err)?;
+        Ok(song)
+    }
+
+    pub async fn toggle_live(&self, partyid: String, password: String) -> Result<()> {
+        Self::collection::<Party>(self, "parties")
+            .update_one(
+                doc! {
+                    "_id": partyid,
+                    "password": password
+                },
+                vec![doc! {
+                    "$set": {
+                        "isLive": {
+                         "$eq": [false, "$isLive"]
+                        }
+                    }
+                }],
                 None,
             )
             .await?;
