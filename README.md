@@ -1,8 +1,14 @@
-## Sovo - Song Voter for fair music playing!
+## Sovo - Song Voter for fair music playing! 🎵🗳️
 
-This monolithic repository holds the implementation of my thesis. For documentation, find *3 Developer Documentation* in the pdf.
+Democratize your party playlist with Sovo! 🎉
 
-# Feature roadmap
+### What is Sovo? 🤔
 
-- Deploy via Docker
-- Implementing alternative player backends (Soundcloud, Spotify)
+Sovo is a distributed, high-performance web service that puts the power of music selection in the hands of partygoers. No more DJ monopoly - let the crowd decide!
+
+### Features ✨
+
+- Distributed architecture for high performance
+- Real-time voting and queue updates
+- Easy-to-use interface for partygoers
+- Fair play based on collective preferences
